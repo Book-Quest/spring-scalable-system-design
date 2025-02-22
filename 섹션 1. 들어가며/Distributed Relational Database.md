@@ -1,6 +1,6 @@
-## 데이터베이스의 규모 확장
+# 데이터베이스의 규모 확장
 
-### 1. 수직적 확장
+## 1. 수직적 확장
 
 데이터베이스 서버의 CPU, RAM, 디스크와 같은 자원을 증설하는 방법이지만, 아래와 같은 단점이 존재한다.
 
@@ -8,16 +8,16 @@
 2. 하나의 데이터베이스를 수직 확장하면 SPOF로 인한 위험성이 큼
 3. 고성능 서버로 갈수록 가격이 올라가므로 고비용
 
-### 2. 수평적 확장
+## 2. 수평적 확장
 
-#### 샤딩(Sharding)이란?
+### 샤딩(Sharding)이란?
 
 샤딩은 대규모 데이터베이스를 여러 개의 작은 데이터베이스(샤드)로 분산하여 저장하는 기술
 
 - **샤드 (Shard)**: 샤딩된 각각의 데이터 단위
 - **샤드 키 (Shard Key)**: 데이터를 분배할 기준이 되는 속성
 
-#### 샤딩의 종류
+### 샤딩의 종류
 
 **1. 수직 샤딩 (Vertical Sharding)**
 
@@ -41,7 +41,7 @@
     - 데이터의 분리로 인해 조인 또는 트랜잭션 관리가 복잡해질 수 있다.
     - 샤드 간 데이터 불균형이 발생할 수 있다.
 
-#### 샤딩 전략
+### 샤딩 전략
 
 샤딩 전략에서 가장 중요하게 고려할 것은 **샤드 키**를 어떻게 정하느냐이다. 샤드 키를 정할때는 데이터가 고르게 분할될 수 있도록 하는게 중요하다. 샤드가 고르게 분할되지 않았을 때는 아래와 같은 문제가 발생한다.
 
@@ -50,11 +50,11 @@
 - **조인과 비정규화(join and de-normalization) 문제:**
     - 하나의 데이터베이스를 여러 서버로 쪼개면, 여러 샤드에 걸친 데이터를 조인하기 힘들다. 이를 해결하는 방법 중 하나는 데이터베이스를 비정규화 하여 조인 없이 하나의 테이블에서 질의가 수행될 수 있도록 하는 것이다.
 
-#### 구체적인 샤딩 방법
+### 구체적인 샤딩 방법
 
 **1. Range-based Sharding (범위 기반 샤딩)**
 
-![image](https://github.com/user-attachments/assets/33dddb6c-6fa8-43dc-bc01-a6c96bebc635)
+<img src="https://github.com/user-attachments/assets/33dddb6c-6fa8-43dc-bc01-a6c96bebc635" width="500" alt="image">
 
 데이터를 특정 값(Shard Key)의 특정 범위에 따라 분할하는 기법
 
@@ -64,7 +64,7 @@
 
 **2. Hash-based Sharding (해시 기반 샤딩)**
 
-![image](https://github.com/user-attachments/assets/72a22bd5-c7b3-4532-8f22-4212ab6b95a6)
+<img src="https://github.com/user-attachments/assets/72a22bd5-c7b3-4532-8f22-4212ab6b95a6" width="500" alt="image">
 
 데이터를 특정 값(Shard Key)의 해시 함수에 따라 분할하는 기법
 
@@ -74,7 +74,7 @@
 
 **3. Directory-based Sharding (디렉토리 기반 샤딩)**
 
-![image](https://github.com/user-attachments/assets/0b33a621-f26a-471e-a688-6d8987af52c6)
+<img src="https://github.com/user-attachments/assets/0b33a621-f26a-471e-a688-6d8987af52c6" width="500" alt="image">
 
 디렉토리를 이용하여 데이터가 저장된 샤드를 관리하는 기법
 
@@ -82,7 +82,7 @@
 - 장점: 유연한 데이터 분배가 가능하고, 동적으로 샤드를 추가/제거 가능.
 - 단점: 디렉토리 관리 비용이 추가되고, 조회 시 추가적인 룩업이 필요.
 
-#### **물리적 샤드 vs 논리적 샤드**
+### **물리적 샤드 vs 논리적 샤드**
 
 **1.물리적 샤드**
 
@@ -94,17 +94,17 @@
 - 하나의 물리적 서버 내에서 논리적으로 데이터를 분할
 - 장점: Router가 샤드 정보를 관리하여 Client 수정 없이 데이터베이스 확장 가능.
 
-#### 샤드와 파티셔닝 차이
+### 샤드와 파티셔닝 차이
 
 어떻게 보면 샤딩은 수평 파티셔닝의 일종으로, 파티셔닝은 모든 데이터를 동일한 컴퓨터에 저장하지만, 샤딩은 데이터를 서로 다른 컴퓨터에 분산한다는 차이점이 있다.
 
 물리적으로 서로 다른 컴퓨터에 데이터를 저장하므로, 쿼리 성능 향상과 더불어 부하가 분산되는 효과까지 얻을 수 있다. 즉, 샤딩은 데이터베이스 차원의 수평 확장(scale-out)인 셈이다.
 
-### 3. 결론
+## 3. 결론
 
 데이터베이스의 수평적 확장인 샤딩을 구현할 때는 데이터의 특성, 쿼리 패턴, 확장성 요구사항 등을 고려하여 적절한 방식을 선택해야 하며, 샤딩으로 인한 복잡성 증가와 관리 오버헤드도 함께 고려해야 한다.
 
-### References
+## References
 
 - [데이터베이스 파티셔닝과 샤딩](https://hudi.blog/db-partitioning-and-sharding/)
 - [Directory-Based Sharding | Implementation in Java](https://medium.com/@ganesh.shah/directory-based-sharding-implementation-in-java-2a3a8627e0ce)
