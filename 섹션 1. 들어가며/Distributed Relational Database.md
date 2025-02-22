@@ -74,6 +74,7 @@
 
 **3. Directory-based Sharding (디렉토리 기반 샤딩)**
 
+![image](https://github.com/user-attachments/assets/0b33a621-f26a-471e-a688-6d8987af52c6)
 
 디렉토리를 이용하여 데이터가 저장된 샤드를 관리하는 기법
 
