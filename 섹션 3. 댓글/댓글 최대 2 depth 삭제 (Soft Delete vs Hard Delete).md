@@ -43,7 +43,6 @@ public class Comment {
 데이터베이스에서 데이터를 직접 삭제하는 방식
 
 - DELETE 쿼리를 날리는 방식
-- 더 이상 사용하지 않는 데이터를 DB에 저장하는 것은 저장 공간 낭비일 수 있음.
 
 #### **[장점]**
 
@@ -61,10 +60,10 @@ public class Comment {
 | --- | --- | --- |
 | **설정 용이성**  | ✅ 단순히 열을 UPDATE하는방식으로 구현이 더 쉬움  | 🟥 삭제할 데이터를 **Audit table**로 복사하는 작업이 포함되어 설정이 어려움 |
 | **디버깅** | ✅ `deleted`과 **Audit table**를 통해 디버깅 가능 | ✅ **Audit table**를 통해 디버깅 가능 |
-| **데이터 복원** | ✅ `deleted=false` 로 삭제된 데이터를 복원하기 쉬움 | 🟥  |
+| **데이터 복원** | ✅ `deleted=false` 로 삭제된 데이터를 복원하기 쉬움 | 🟥 복원이 어려움 |
 | **active data 쿼리** | 🟥 where 조건에 `deleted=false` 조건을 추가하는 것을 잊었을 때 문제가 발생할 가능성 있음 (`@where` 으로 해결 가능) | ✅ 삭제된 데이터를 조회할 가능성 없음 |
 | **뷰 단순성** | 🟥 active data와 삭제된 데이터가 한 테이블에 존재 | ✅ 삭제된 데이터는 audit table에만 있고 active data는 나머지 테이블에 존재 (분리) |
-| **작업 성능** | ✅ UPDATE는 DELETE보다 빠름(microsecond) | 🟥  |
+| **작업 성능** | ✅ UPDATE는 DELETE보다 빠름(microsecond) | 🟥  DELETE는 UPDATE보다 느림 |
 | **애플리케이션 속도** | 🟥 모든 SELECT 쿼리에 `deleted=false` 가 추가되어 더 느림 | ✅ 조건이 더 적으므로 쿼리 속도가 더 빠름 |
 | **애플리케이션 크기** | 🟥 삭제된 데이터와 active 데이터가 한 테이블에 존재하여 테이블 크기가 커짐 | ✅ active data만 테이블에 존재하여 공간 절약 |
 | **DB UNIQUE Index** | 🟥 **UNIQUE index 사용 불가능** ex) unique index : (컬럼a, 컬럼b, deleted) | ✅ 데이터가 아예 삭제되므로 새로운 데이터를 삽입할 때 UNIQUE index가 충돌하지 않음 |
