@@ -162,3 +162,11 @@ AND {인덱스 컬럼2} = {검색값2};
 데이터베이스 인덱스는 기본적으로 오름차순으로 정렬되어 있으므로 ORDER BY DESC를 사용할 경우 인덱스를 뒤에서부터 읽어야함.
 
 ⇒ 인덱스를 활용하지 않으면 정렬 연산이 필요하므로 성능 저하 가능
+
+**참고자료**
+
+[https://velog.io/@jooh95/DB-Scan-종류-정리](https://velog.io/@jooh95/DB-Scan-%EC%A2%85%EB%A5%98-%EC%A0%95%EB%A6%AC)
+
+https://adjh54.tistory.com/163#1)%20%ED%85%8C%EC%9D%B4%EB%B8%94%20%EC%A0%84%EC%B2%B4%20%EC%8A%A4%EC%BA%94(Table%20Full%20Scan)-1
+
+[https://velog.io/@tothek/인덱스-기본-INDEX-SCAN종류](https://velog.io/@tothek/%EC%9D%B8%EB%8D%B1%EC%8A%A4-%EA%B8%B0%EB%B3%B8-INDEX-SCAN%EC%A2%85%EB%A5%98)
