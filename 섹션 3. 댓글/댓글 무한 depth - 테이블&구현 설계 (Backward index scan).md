@@ -1,15 +1,15 @@
-## 인덱스가 필요한 이유 및 실제 Query Plan
+## I. 인덱스가 필요한 이유 및 실제 Query Plan
 인덱스는 다음 과정을 통해 레코드를 읽는다.
 
 1. 인덱스를 통해 PK를 찾는다.
 2. PK를 통해 레코드를 찾는다.
 
-- 인덱스를 통해 레코드 1건을 읽는 것이 4-5배 정도 비싸기 때문에, 읽어야 할 레코드의 건수가 전체 테이블 레코드의 20-25%를 넘어서면 인덱스를 이용하지 않는 것이 효율적이다.
-- 이런 경우 옵티마이저가 인덱스를 조회하고 데이터에 접근하는 것보다 바로 데이터를 조회하는 비용이 더 낫다고 판단하면, Index Scan 대신 Sequential Scan을 사용하기도 한다.
-- PostgreSQL의 경우 `random_page_cost`와 같은 파라미터를 조정하여 인덱스 스캔과 순차 스캔 간의 전환점을 조정할 수 있다.
-- 기계적 디스크 저장소에 대한 랜덤 액세스는 일반적으로 순차 액세스보다 4배 이상 비싸다. 그러나 인덱싱된 읽기 같이 디스크에 대한 랜덤 액세스 대부분은 캐시에서 일어나므로 작은 기본값(4.0)으로 설정된다.
+- 인덱스를 통한 랜덤 액세스는 일반적으로 순차 액세스보다 비용이 더 많이 든다. PostgreSQL의 기본 설정에서는 `random_page_cost`가 4.0으로 설정되어 있어, 랜덤 액세스가 순차 액세스보다 약 4배 비싸다고 가정한다.
+- 이로 인해 읽어야 할 레코드의 건수가 전체 테이블 레코드의 약 5-10%를 넘어서면 인덱스를 이용하지 않는 것이 효율적이다. 일부 상황에서는 이 비율이 20-25%까지 올라갈 수 있다.
+- 옵티마이저는 이러한 비용 계산을 바탕으로 인덱스 스캔과 순차 스캔 중 더 효율적인 방법을 선택합니다. 테이블의 크기, 인덱스의 선택성, 하드웨어 특성 등 여러 요소를 고려한다.
+- SSD와 같은 저장 장치를 사용할 경우, 랜덤 액세스와 순차 액세스의 성능 차이가 크게 줄어든다. 이 경우 `random_page_cost`를 1.0 또는 1.1로 낮추어 설정하면 인덱스 스캔이 더 자주 선택되도록 할 수 있다.
 
-## 테이블 스캔 방식
+## II. 테이블 스캔 방식
 PostgreSQL은 5가지 스캔 방식(Sequential Scan, Index Scan, Index Only Scan, Bitmap Scan, TID Scan)을 사용한다.
 
 ### 1. Sequential Scan
@@ -45,7 +45,7 @@ PostgreSQL은 5가지 스캔 방식(Sequential Scan, Index Scan, Index Only Scan
 - 옵티마이저는 특정 조건에 따라 동작하는 패턴을 위처럼 도식화할 수 있다.
 - 그러나 실제로 옵티마이저가 스캔 방식을 선택할 때는 훨씬 다양한 요소들을 종합적으로 고려하기 때문에, 항상 위 패턴을 따르지는 않는다.
 
-## 인덱스를 활용한 Sort 오퍼레이션 생략하기
+## III. 인덱스를 활용한 Sort 오퍼레이션 생략하기
 
 - ORDER BY가 포함된 쿼리는 일반적으로 Sort 오퍼레이션이 발생하지만, 적절한 인덱스를 사용하면 이를 생략할 수 있다.
 
@@ -72,7 +72,7 @@ SELECT * FROM employee WHERE begin_date = '20231119' ORDER BY end_date;
 
 이 경우 (begin_date, end_date) 인덱스는 begin_date로 정렬된 후 end_date로 정렬되어 있기 때문에, begin_date가 '20231119'인 데이터들 사이에서도 end_date로 정렬되어 있음을 보장한다.
 
-## Reference
+## References
 - [프로젝트 삽질기1 (feat Table Scan 실행계획)](https://overcome-the-limits.tistory.com/698#%EB%93%A4%EC%96%B4%EA%B0%80%EB%A9%B0-2)
 - [[PostgreSQL 공식문서] Query Plan](https://postgresql.kr/docs/current/runtime-config-query.html)
 - [PostgreSQL 실행계획 분석하기 2편 (Table Scan)](https://hyunwook.dev/226)
