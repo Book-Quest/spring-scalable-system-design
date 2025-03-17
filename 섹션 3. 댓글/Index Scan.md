@@ -86,7 +86,6 @@ SELECT * FROM {테이블명} WHERE {인덱스 컬럼} BETWEEN {범위 시작값}
 
 - WHERE문에 =을 사용했을 때나 기본키, 고유 인덱스로 테이블에 접근하는 방식
 - 인덱스를 사용하는 방식 중 가장 효율적인 스캔 방식.
-    - **하나의 값만 읽어들이므로 비용이 가장 적게 듦**
 
 ```sql
 SELECT * FROM {테이블명} WHERE {인덱스 컬럼} = {검색값}
@@ -101,7 +100,7 @@ SELECT * FROM {테이블명} WHERE {인덱스 컬럼} = {검색값}
 - PRIMARY KEY나 UNIQUE 인덱스를 사용하여 조회
 - 인덱스에서 단일 값을 검색할 때
 
-### (4) Index Loose Scan
+### (4) Index Loose Scan (Index Skip Scan)
 
 인덱스의 일부 데이터만 읽어오는 방식으로, 인덱스의 범위를 지정하지 않고 검색을 수행
 
