@@ -96,7 +96,11 @@ Redis가 제공하는 백업 방식
 | 성능 영향 | 높음 (모든 연산이 로그로 기록됨) | 낮음 (주기적인 덤프 수행) |
 
 - **RDB** : 서버 장애 발생 시, 백업 이후 서버 장애가 발생한 시점까지의 데이터가 유실된다.
+  ![image](https://github.com/user-attachments/assets/809a6e3d-89b7-40ff-98f9-a8fa816f5e29)
+
 - **AOF** : 서버 장애 발생 시, 데이터 복구를 위해 기록된 모든 로그를 순서대로 재실행하므로 서버 재실행 속도가 느리다.
+  ![image](https://github.com/user-attachments/assets/6b9055e9-7dc3-4451-acec-7acadd10caa2)
+
   - ex) 100번 increment 작업을 통해 0를 100으로 만들었다. RDB방식에서는 단순히 저장된 데이터 100을 읽어오면 되지만, AOF 방식에서는 100번의 Increment 작업을 실행해야한다.
 
 ### 3) RDB + AOF 병행 전략 (AOF-RDB Hybrid 방식)
