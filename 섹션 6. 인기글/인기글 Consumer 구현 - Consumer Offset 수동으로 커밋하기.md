@@ -52,7 +52,7 @@
     public ConcurrentKafkaListenerContainerFactory kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
-        factory.getContainerProperties().setAckMode(AckMode.MANUAL); // 수동 커밋 활성화
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE); // 수동 커밋 활성화
         factory.setConcurrency(3); // 병렬 처리
         return factory;
     }
@@ -75,7 +75,8 @@
         }
     }
     ```
-
+  - `MANUAL` 모드 + `acknowledgment.acknowledge(); 실행 시 즉시 커밋하지 않고, 커밋 요청만 큐잉하여 이후 백그라운드에서 비동기적으로 커밋이 발생하므로, 커밋 전에 장애 발생 시 중복 처리 가능성이 남아 있다.
+  - 따라서, AckMode.MANUAL을 사용하면서 즉시 커밋을 보장해야 할 때는 `consumer.commitSync();`으로 즉시 동기식 커밋 강제 실행하거나, `MANUAL_IMMEDIATE`로 전환하여 `acknowledge()` 호출 시 즉시 commitSync() 실행되어 중복 위험 감소
 - **배치 처리**
     ```java
     @KafkaListener(topics = "test-topic", batch = "true")
