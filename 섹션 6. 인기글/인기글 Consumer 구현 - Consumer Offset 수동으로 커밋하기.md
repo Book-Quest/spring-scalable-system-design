@@ -28,8 +28,6 @@
     | 유실 발생        | 처리 시간 > 커밋 간격 → 미처리 메시지 커밋        | 장애 시 데이터 유실    |
     | 중복 발생        | 리밸런싱 시 커밋되지 않은 오프셋 재할당           | 동일 메시지 재처리     |
 
----
-
 ## 2. Spring Kafka 수동 커밋 구현
 
 ### 2.1 설정 단계
@@ -92,7 +90,6 @@
     }
     ```
 
----
 
 ## 3. AckMode 상세 동작 비교
 
@@ -103,39 +100,57 @@
 | BATCH              | 모든 레코드 처리 후 자동         | Container                | 단순 배치 처리      |
 | RECORD             | 레코드 단위 처리 직후           | Container                | 실시간 스트림       |
 
----
 
-## 4. 주의사항 및 리밸런싱 대응
+## 4. 주의사항 및 대응
 
 - **커밋 누락 위험**
-    ```
-    @KafkaListener(...)
-    public void listen(..., Acknowledgment ack) {
-        processMessage();
-        // ack.acknowledge() 누락 → 오프셋 미갱신
-    }
-    ```
-    - 동일 메시지 무한 재처리 → Consumer Lag 증가
-
-- **리밸런싱 대응**
-    ```
-    factory.getContainerProperties().setConsumerRebalanceListener(
-        new ConsumerAwareRebalanceListener() {
-            @Override
-            public void onPartitionsRevoked(
-                Collection partitions,
-                Consumer consumer
-            ) {
-                consumer.commitSync(); // 리밸런싱 직전 강제 커밋
+    ```java
+        @Slf4j
+    @Service
+    public class PushService {
+        public void sendPush(final MessageReq req, Acknowledgment acknowledgment) {
+            try {
+                log.info("push Success : {}", req);
+            } catch (SendFailureException e) {
+                log.error("push failure : {}", e.getMessage());
+                // DLT 처리
+                acknowledgment.acknowledge(); // 에러 지점
             }
         }
-    );
+    }
+    
     ```
-    - 파티션 해제 시점에 명시적 커밋 → 중복 처리 최소화
+    - 에러 발생 시나리오:
+      - NPE 등 SendFailureException 외 다른 예외 발생 시 acknowledge()가 호출되지 않아, 오프셋 커밋이 정상적으로 이루어지지 않는다.
+    - 결과:
+      - 미커밋 오프셋 → 메시지 재처리 → 무한 재시도 발생
+      - Consumer Lag 증가 + 로그 미출력 → 침묵형 장애
 
----
+- **해결 방법**
+    ```java
+        @Slf4j
+    @Service
+    public class PushService {
+        public void sendPush(final MessageReq req, Acknowledgment acknowledgment) {
+            try {
+                // 푸시 로직
+            } catch (SendFailureException e) {
+                log.error("push failure: {}", e.getMessage());
+                // DLT 처리
+            } catch (Exception e) {
+                log.error("알 수 없는 오류: {}", e.getMessage());
+            } finally {
+                acknowledgment.acknowledge(); // 모든 케이스 커밋 보장
+            }
+        }
+    }
+
+    ```
+    - finally 블록으로 모든 실행 경로에서 커밋 보장이 필요하다.
+
 
 ### References
-- https://lsj8367.tistory.com/entry/Kafka-Offset-Commit%EC%9D%98-%EC%A4%91%EC%9A%94%EC%84%B1
-- https://dkswnkk.tistory.com/744
-- https://oliveyoung.tech/2024-10-16/oliveyoung-scm-oms-kafka/
+- [Spring Boot Kafka with MANUAL_IMMEDIATE ack](https://stackoverflow.com/questions/60929385/spring-boot-kafka-with-manual-immediate-ack)
+- [[Kafka] 컨슈머 오프셋 수동으로 커밋하기](https://dkswnkk.tistory.com/744)
+- [Kafka 메시지 중복 및 유실 케이스별 해결 방법](https://oliveyoung.tech/2024-10-16/oliveyoung-scm-oms-kafka/)
+- [Kafka Offset 커밋의 중요성 - 커밋 누락 위험](https://lsj8367.tistory.com/entry/Kafka-Offset-Commit%EC%9D%98-%EC%A4%91%EC%9A%94%EC%84%B1)
