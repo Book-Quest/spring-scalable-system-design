@@ -198,13 +198,40 @@ Debezium의 역할 : binlog를 CDC 방식을 사용하여 DB의 변경사항을 
 2. 최근 처리된 메시지 ID로부터 일정 간격 떨어진 오래된 메시지만 삭제 (lock 경합 감소)
 - insert와 delete가 접근하는 ID 대역을 분리하여 lock 경합 최소화
 
-### 29cm : Transactional Outbox
-- **기존 HTTP 통신의 한계를 넘기 위해 EDA 전환**: 마이크로서비스 고도화 과정에서 동기식 HTTP API만으로는 한계가 있어 Kafka 기반의 Event Driven Architecture 도입을 결정
-- CDC가 아닌 Transactional Outbox 선택 이유
-    1. 팀 내 CDC 경험 부족 → 안정적 운영에 우려
-    2. CDC는 메시지 형식 커스터마이징이 어려움 → Consumer가 추가 로직이 필요
-    3. 테이블 스키마 변경에 CDC는 취약 → 서비스 간 독립성 저해
+### Shopfiy : Transaction Log Tailing
 
+- 목적 : Shopify 핵심 모놀리스를 지원하는 100개 이상의 MySQL 샤드에서 실시간으로 데이터를 수집하기 위해 CDC 시스템 도입
+- 도구 : Debezium
+    - 다양한 CDC 도구를 검토한 결과, 활발한 개발과 커뮤니티 지원, 멀티 데이터베이스 지원
+
+**아키텍처 설계 전략 :**
+
+**(1) 기본 구조**
+
+- 데이터 흐름: MySQL → Debezium → Kafka
+- Debezium CDC 이벤트를 Kafka로 전송 → 기존 Kafka 기반 인프라와 통합하고 표준 스트림 처리 방식 활용
+
+**(2) 샤딩 구조 통합 처리**
+
+**문제점**: Debezium 기본 설정은 샤드마다 테이블별로 Kafka 토픽을 생성 → 100개 이상의 MySQL 샤드로 인해 테이블별 다중 토픽 문제 발생
+
+ex) shopify_shard_1.products / shopify_shard_1.users / shopify_shard_1.orders
+
+shopify_shard_2.products / shopify_shard_2.users / shopify_shard_2.orders
+
+**해결책**: 
+
+1. 샤드별로 하나의 Debezium 커넥터를 구성하고, 각 샤드의 CDC 이벤트를 하나의 토픽으로 통합(수집)
+    
+    ex) shopify_shard_1_events (모든 테이블 변경사항), shopify_shard_2_events (모든 테이블 변경사항), …
+    
+2. Kafka Streams 애플리케이션이 각 샤드별 통합 토픽을 읽고 테이블 정보를 기반으로 레코드를 분류한다.
+    
+    ⇒ 논리 테이블당 1개의 Kafka 토픽 구성 (ex. products, users 등)
+    
+    ex) products_topic (모든 샤드의 products 변경사항) , users_topic (모든 샤드의 users 변경사항),  orders_topic (모든 샤드의 orders 변경사항)
+    
+    ⇒ consumer는 샤드와 무관하게 테이블 단위로 1개의 토픽만 구독하면 됨
 
 ---
 
