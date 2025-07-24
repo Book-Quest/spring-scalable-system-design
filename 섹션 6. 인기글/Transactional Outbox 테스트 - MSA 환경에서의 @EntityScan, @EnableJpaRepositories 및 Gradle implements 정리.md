@@ -68,4 +68,4 @@ public class DataConfig {
  
 ### References
 - [[Gradle] Gradle Java 플러그인과 implementation와 api의 차이
--[다른 모듈의 jpa entity scan 시 발생하는 문제점 분석](https://velog.io/@kkywalk2/%EB%8B%A4%EB%A5%B8-package%EC%9D%98-spring-component-%EC%8A%A4%EC%BA%94%ED%95%98%EA%B8%B0)
+- [다른 모듈의 jpa entity scan 시 발생하는 문제점 분석](https://velog.io/@kkywalk2/%EB%8B%A4%EB%A5%B8-package%EC%9D%98-spring-component-%EC%8A%A4%EC%BA%94%ED%95%98%EA%B8%B0)
