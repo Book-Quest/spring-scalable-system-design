@@ -110,6 +110,12 @@ Command Query Responsibility Segregation으로, 데이터에 대한 변경(Comma
 
 - 읽기 모델의 경우, 조회 성능 최적화를 위해 쓰기 모델과는 다른 테이블 구조나 데이터 형식을 사용할 수 있다. (ex. 모두 하나의 테이블에 담기, JSON형식으로 구성하기 등)
 
+***Event Bus : 이벤트를 여러 컴포넌트에 전달하는 수단 (ex. Kafka, RabbitMQ 등)*
+
+***Event Handler : Event Bus로 부터 이벤트를 구독해서 처리하는 로직*
+
+***Projection : 이벤트를 바탕으로 읽기 모델을 구성하는 행위나 컴포넌트*
+
 ### CQRS + 이벤트 소싱은 언제 사용해야 할까?
 
 [적합한 상황]
